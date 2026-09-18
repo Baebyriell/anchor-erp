@@ -162,6 +162,9 @@ a{ color: var(--fg); text-decoration: none; }
   margin-top: 40px;
   width: 200px;
   aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  display: block;
 }
 
 /* ---------- image placeholders ---------- */

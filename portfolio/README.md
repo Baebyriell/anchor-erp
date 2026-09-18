@@ -12,22 +12,11 @@ portfolio/
   assets/images/     (drop photos here)
 ```
 
-## Adding the headshot and screenshots
+## Adding images
 
-The site currently has placeholder boxes (dashed borders, labeled) where images will go:
+**Headshot** — done. `assets/images/headshot.jpg` is live in the hero. A second option, `assets/images/headshot-alt.jpg` (the office/desk shot), is saved in the same folder if you'd rather swap it in; just change the `src` on the `<img class="hero-photo">` tag in `index.html`.
 
-1. **Headshot** — save the image as `assets/images/headshot.jpg`, then in `index.html` replace:
-   ```html
-   <div class="hero-photo img-placeholder" aria-hidden="false">
-     <span>Headshot<br><small>portfolio/assets/images/headshot.jpg</small></span>
-   </div>
-   ```
-   with:
-   ```html
-   <img class="hero-photo" src="assets/images/headshot.jpg" alt="Eugenia Ohenewa Amadi">
-   ```
-
-2. **JiXuan screenshots** — save images as `assets/images/jixuan-1.jpg`, `jixuan-2.jpg`, etc., then in the Builder section replace the placeholder `<div class="img-placeholder shot-placeholder">` block with `<img>` tags (or a small `<div class="shot-row">` of a few images) pointing at those files.
+**JiXuan screenshots** — still a placeholder. Save images as `assets/images/jixuan-1.jpg`, `jixuan-2.jpg`, etc., then in the Builder section replace the `<div class="img-placeholder shot-placeholder">` block with `<img>` tags (or a small `<div class="shot-row">` of a few images) pointing at those files.
 
 No other markup needs to change.
 
