@@ -1,24 +1,44 @@
 (function () {
-  var sections = document.querySelectorAll('main .section, .hero');
-  var navLinks = document.querySelectorAll('.site-nav a');
+  var html = document.documentElement;
+  var chapters = document.querySelectorAll('.chapter');
+  var navLinks = document.querySelectorAll('.index-nav a[data-chapter]');
+  var panel = document.getElementById('panel');
 
-  if (!('IntersectionObserver' in window) || !sections.length) return;
+  if (!chapters.length || !navLinks.length) return;
 
-  var linkFor = function (id) {
-    return document.querySelector('.site-nav a[href="#' + id + '"]');
-  };
+  html.classList.add('js');
 
-  var observer = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry) {
-      if (!entry.isIntersecting) return;
-      var link = linkFor(entry.target.id);
-      if (!link) return;
-      navLinks.forEach(function (a) { a.removeAttribute('aria-current'); });
-      link.setAttribute('aria-current', 'true');
+  var ids = Array.prototype.map.call(chapters, function (c) { return c.id; });
+
+  function show(id) {
+    if (ids.indexOf(id) === -1) id = ids[0];
+
+    chapters.forEach(function (chapter) {
+      chapter.classList.toggle('is-active', chapter.id === id);
     });
-  }, { rootMargin: '-40% 0px -55% 0px' });
+    navLinks.forEach(function (link) {
+      var active = link.getAttribute('data-chapter') === id;
+      link.classList.toggle('is-active', active);
+      if (active) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    });
+    if (panel) panel.scrollTop = 0;
+  }
 
-  sections.forEach(function (section) {
-    if (section.id) observer.observe(section);
+  navLinks.forEach(function (link) {
+    link.addEventListener('click', function (event) {
+      event.preventDefault();
+      var id = link.getAttribute('data-chapter');
+      if (location.hash !== '#' + id) {
+        history.pushState(null, '', '#' + id);
+      }
+      show(id);
+    });
   });
+
+  window.addEventListener('popstate', function () {
+    show(location.hash.replace('#', ''));
+  });
+
+  show(location.hash.replace('#', '') || ids[0]);
 })();
