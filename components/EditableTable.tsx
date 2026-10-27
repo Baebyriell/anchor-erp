@@ -71,10 +71,18 @@ export default function EditableTable({
   };
 
   // 6. Export data to standard CSV
+  // Escape quotes and neutralise spreadsheet formulas (=, +, -, @) so an
+  // exported cell can't run code when the file is opened in Excel/Sheets.
+  const toCSVCell = (value: unknown) => {
+    let text = String(value ?? '');
+    if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+
   const exportToCSV = () => {
     const csvContent = [
-      headers.join(','),
-      ...rows.map(row => headers.map(h => `"${row[h] || ''}"`).join(','))
+      headers.map(toCSVCell).join(','),
+      ...rows.map(row => headers.map(h => toCSVCell(row[h])).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
