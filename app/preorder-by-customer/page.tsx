@@ -1,52 +1,43 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function PreorderByCustomerTracker() {
-  const [headers, setHeaders] = useState([
-    'Customer Name',
-    'Items Ordered (Pre-orders)',
-    'Specifications Allocated',
-    'Total Pre-order Cost (GHS)',
-    'Customer Pre-order Status'
-  ]);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'preorder_by_customer',
+    [
+      {
+        'Customer Name': 'Ama Serwaa',
+        'Items Ordered (Pre-orders)': 'Luxury Mesh Sneakers',
+        'Specifications Allocated': 'Pink / Size 40',
+        'Total Pre-order Cost (GHS)': '212.50',
+        'Customer Pre-order Status': 'Shipped (12 days left)'
+      },
+      {
+        'Customer Name': 'Abena Osei',
+        'Items Ordered (Pre-orders)': 'Foldable LED Ring Light (x3)',
+        'Specifications Allocated': 'Warm Light / 12 inch',
+        'Total Pre-order Cost (GHS)': '540.00',
+        'Customer Pre-order Status': 'Packed & Ready to Ship'
+      }
+    ],
+    [
+      'Customer Name',
+      'Items Ordered (Pre-orders)',
+      'Specifications Allocated',
+      'Total Pre-order Cost (GHS)',
+      'Customer Pre-order Status'
+    ]
+  );
 
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Automatically fetch customer package arrays from local browser cache storage
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_preorder_by_customer_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default sample logs showing customer pre-order group statuses
-      setRows([
-        {
-          'Customer Name': 'Ama Serwaa',
-          'Items Ordered (Pre-orders)': 'Luxury Mesh Sneakers',
-          'Specifications Allocated': 'Pink / Size 40',
-          'Total Pre-order Cost (GHS)': '212.50',
-          'Customer Pre-order Status': 'Shipped (12 days left)'
-        },
-        {
-          'Customer Name': 'Abena Osei',
-          'Items Ordered (Pre-orders)': 'Foldable LED Ring Light (x3)',
-          'Specifications Allocated': 'Warm Light / 12 inch',
-          'Total Pre-order Cost (GHS)': '540.00',
-          'Customer Pre-order Status': 'Packed & Ready to Ship'
-        }
-      ]);
-    }
-  }, []);
-
-  // Sync changes instantly into browser local memory when cells are updated inline
+  // Sync changes to the server when cells are updated inline
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
-    setRows(updatedRows);
-    localStorage.setItem('erp_preorder_by_customer_v2', JSON.stringify(updatedRows));
+    update(updatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -74,6 +65,8 @@ export default function PreorderByCustomerTracker() {
         </div>
 
         {/* Core Spreadsheet Component Integration */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

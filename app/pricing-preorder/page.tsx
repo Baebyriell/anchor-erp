@@ -1,5 +1,6 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 interface PricingRow {
   id: string;
@@ -12,8 +13,27 @@ interface PricingRow {
 }
 
 export default function PreOrderPricingEngine() {
-  const [rows, setRows] = useState<PricingRow[]>([]);
-  
+  const { rows, update: saveRows, status } = useSheet<PricingRow>('pricing_preorder', [
+    {
+      id: '1',
+      name: 'Luxury Mesh Sneakers',
+      rmbPrice: 85,
+      chinaDeliveryRmb: 10,
+      profitPercentage: 25,
+      weightKg: 0.85,
+      agent: 'vuoman'
+    },
+    {
+      id: '2',
+      name: 'Foldable LED Ring Light',
+      rmbPrice: 120,
+      chinaDeliveryRmb: 0,
+      profitPercentage: 20,
+      weightKg: 1.40,
+      agent: 'aquantuo'
+    }
+  ]);
+
   // Custom Input Forms
   const [name, setName] = useState('');
   const [rmbPrice, setRmbPrice] = useState('');
@@ -26,39 +46,6 @@ export default function PreOrderPricingEngine() {
   const RMB_TO_GHS = 1.65;
   const USD_TO_GHS = 15.90;
   const AGENT_RATES = { vuoman: 10.50, aquantuo: 14.00 };
-
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_pricing_preorder_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      setRows([
-        {
-          id: '1',
-          name: 'Luxury Mesh Sneakers',
-          rmbPrice: 85,
-          chinaDeliveryRmb: 10,
-          profitPercentage: 25,
-          weightKg: 0.85,
-          agent: 'vuoman'
-        },
-        {
-          id: '2',
-          name: 'Foldable LED Ring Light',
-          rmbPrice: 120,
-          chinaDeliveryRmb: 0,
-          profitPercentage: 20,
-          weightKg: 1.40,
-          agent: 'aquantuo'
-        }
-      ]);
-    }
-  }, []);
-
-  const saveRows = (updatedRows: PricingRow[]) => {
-    setRows(updatedRows);
-    localStorage.setItem('erp_pricing_preorder_v2', JSON.stringify(updatedRows));
-  };
 
   const handleAddCalculatedRow = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +143,8 @@ export default function PreOrderPricingEngine() {
         </section>
 
         {/* Display Live Calculated Pricing Board Spreadsheet */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <div className="overflow-x-auto border border-slate-800 rounded-lg">
           <table className="w-full text-left border-collapse text-xs">
             <thead>

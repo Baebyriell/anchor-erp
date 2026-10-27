@@ -1,49 +1,41 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function AvailableGoodsPricing() {
-  const [headers, setHeaders] = useState([
-    'Item Name',
-    'Total Landed Cost (GHS)',
-    'Target Profit Margin',
-    'Calculated Profit (GHS)',
-    'Final Retail Selling Price (GHS)',
-    'Min. Wholesale Price (GHS)',
-    'Pricing Strategy Notes'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Automatically load saved pricing arrays from browser cache
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_pricing_available_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default sample logs showing how the markup engine computes selling prices
-      setRows([
-        {
-          'Item Name': 'Stainless Steel Water Flask',
-          'Total Landed Cost (GHS)': '120.00',
-          'Target Profit Margin': '25%',
-          'Calculated Profit (GHS)': '30.00',
-          'Final Retail Selling Price (GHS)': '150.00',
-          'Min. Wholesale Price (GHS)': '135.00',
-          'Pricing Strategy Notes': 'Matches local retail market averages'
-        },
-        {
-          'Item Name': 'Wireless Bluetooth Earbuds',
-          'Total Landed Cost (GHS)': '80.00',
-          'Target Profit Margin': '30%',
-          'Calculated Profit (GHS)': '24.00',
-          'Final Retail Selling Price (GHS)': '104.00',
-          'Min. Wholesale Price (GHS)': '90.00',
-          'Pricing Strategy Notes': 'Include free shipping code promo if buying 2+'
-        }
-      ]);
-    }
-  }, []);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'pricing_available',
+    [
+      {
+        'Item Name': 'Stainless Steel Water Flask',
+        'Total Landed Cost (GHS)': '120.00',
+        'Target Profit Margin': '25%',
+        'Calculated Profit (GHS)': '30.00',
+        'Final Retail Selling Price (GHS)': '150.00',
+        'Min. Wholesale Price (GHS)': '135.00',
+        'Pricing Strategy Notes': 'Matches local retail market averages'
+      },
+      {
+        'Item Name': 'Wireless Bluetooth Earbuds',
+        'Total Landed Cost (GHS)': '80.00',
+        'Target Profit Margin': '30%',
+        'Calculated Profit (GHS)': '24.00',
+        'Final Retail Selling Price (GHS)': '104.00',
+        'Min. Wholesale Price (GHS)': '90.00',
+        'Pricing Strategy Notes': 'Include free shipping code promo if buying 2+'
+      }
+    ],
+    [
+      'Item Name',
+      'Total Landed Cost (GHS)',
+      'Target Profit Margin',
+      'Calculated Profit (GHS)',
+      'Final Retail Selling Price (GHS)',
+      'Min. Wholesale Price (GHS)',
+      'Pricing Strategy Notes'
+    ]
+  );
 
   // Intercept data updates to auto-run cell math before writing to storage
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
@@ -65,12 +57,11 @@ export default function AvailableGoodsPricing() {
       return newRow;
     });
 
-    setRows(calculatedRows);
-    localStorage.setItem('erp_pricing_available_v2', JSON.stringify(calculatedRows));
+    update(calculatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -98,6 +89,8 @@ export default function AvailableGoodsPricing() {
         </div>
 
         {/* Core Spreadsheet Visual Canvas */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

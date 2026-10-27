@@ -1,49 +1,41 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function PreorderByItemTracker() {
-  const [headers, setHeaders] = useState([
-    'Item Name',
-    'Who Purchased',
-    'Item Specifications (Color/Size)',
-    'Order Quantity',
-    'Unit Selling Price (GHS)',
-    'Calculated Total Cost (GHS)',
-    'Logistics Step Status'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Instantly read saved item pipelines from local cache memory
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_preorder_by_item_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default sample items tracking your granular Chinese workflow milestones
-      setRows([
-        {
-          'Item Name': 'Luxury Mesh Sneakers',
-          'Who Purchased': 'Ama Serwaa',
-          'Item Specifications (Color/Size)': 'Pink / Size 40',
-          'Order Quantity': '1',
-          'Unit Selling Price (GHS)': '212.50',
-          'Calculated Total Cost (GHS)': '212.50',
-          'Logistics Step Status': 'Shipped (12 days left)'
-        },
-        {
-          'Item Name': 'Foldable LED Ring Light',
-          'Who Purchased': 'Abena Osei',
-          'Item Specifications (Color/Size)': 'Warm Light / 12 inch',
-          'Order Quantity': '3',
-          'Unit Selling Price (GHS)': '180.00',
-          'Calculated Total Cost (GHS)': '540.00',
-          'Logistics Step Status': 'In Warehouse'
-        }
-      ]);
-    }
-  }, []);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'preorder_by_item',
+    [
+      {
+        'Item Name': 'Luxury Mesh Sneakers',
+        'Who Purchased': 'Ama Serwaa',
+        'Item Specifications (Color/Size)': 'Pink / Size 40',
+        'Order Quantity': '1',
+        'Unit Selling Price (GHS)': '212.50',
+        'Calculated Total Cost (GHS)': '212.50',
+        'Logistics Step Status': 'Shipped (12 days left)'
+      },
+      {
+        'Item Name': 'Foldable LED Ring Light',
+        'Who Purchased': 'Abena Osei',
+        'Item Specifications (Color/Size)': 'Warm Light / 12 inch',
+        'Order Quantity': '3',
+        'Unit Selling Price (GHS)': '180.00',
+        'Calculated Total Cost (GHS)': '540.00',
+        'Logistics Step Status': 'In Warehouse'
+      }
+    ],
+    [
+      'Item Name',
+      'Who Purchased',
+      'Item Specifications (Color/Size)',
+      'Order Quantity',
+      'Unit Selling Price (GHS)',
+      'Calculated Total Cost (GHS)',
+      'Logistics Step Status'
+    ]
+  );
 
   // Run auto-multiplication calculations before storing the changes
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
@@ -58,12 +50,11 @@ export default function PreorderByItemTracker() {
       return newRow;
     });
 
-    setRows(matrixCalculatedRows);
-    localStorage.setItem('erp_preorder_by_item_v2', JSON.stringify(matrixCalculatedRows));
+    update(matrixCalculatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -96,6 +87,8 @@ export default function PreorderByItemTracker() {
         </div>
 
         {/* The Operational Supply Table Sheet View */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

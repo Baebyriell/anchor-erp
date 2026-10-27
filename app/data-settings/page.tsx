@@ -1,15 +1,21 @@
 'use client';
 import React, { useState } from 'react';
+import { deleteSheet } from '../actions/sheets';
+import type { SheetKey } from '../../lib/sheets';
 
 export default function DataSettingsControl() {
   const [importStatus, setImportStatus] = useState<string | null>(null);
 
-  // 1. Wipe out local cache cleanly to start over
-  const handleClearCache = (key: string, label: string) => {
+  // 1. Wipe a sheet on the server cleanly to start over
+  const handleClearCache = async (key: SheetKey, label: string) => {
     if (confirm(`Are you absolutely sure you want to clear all data for ${label}? This cannot be undone.`)) {
-      localStorage.removeItem(key);
-      alert(`${label} cache cleared successfully!`);
-      window.location.reload();
+      try {
+        await deleteSheet(key);
+        alert(`${label} data cleared successfully!`);
+        window.location.reload();
+      } catch {
+        alert(`Could not clear ${label}. Please try again.`);
+      }
     }
   };
 
@@ -88,13 +94,13 @@ export default function DataSettingsControl() {
           </p>
 
           <div className="flex flex-wrap gap-2 pt-2">
-            <button onClick={() => handleClearCache('erp_customers_v2', 'Customer CRM')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
+            <button onClick={() => handleClearCache('customers', 'Customer CRM')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
               Wipe Customer CRM
             </button>
-            <button onClick={() => handleClearCache('erp_sales_ledger_v2', 'Available Goods Sales')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
+            <button onClick={() => handleClearCache('sales_ledger', 'Available Goods Sales')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
               Wipe Daily Sales Ledger
             </button>
-            <button onClick={() => handleClearCache('erp_preorder_by_item_v2', 'Pre-Order Matrix')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
+            <button onClick={() => handleClearCache('preorder_by_item', 'Pre-Order Matrix')} className="bg-rose-950/20 border border-rose-900/40 text-rose-400 px-3 py-1.5 rounded text-xs font-bold hover:bg-rose-900/30 transition">
               Wipe Pre-Order Pipeline
             </button>
           </div>

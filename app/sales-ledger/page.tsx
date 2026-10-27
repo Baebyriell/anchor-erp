@@ -1,49 +1,41 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function SalesLedger() {
-  const [headers, setHeaders] = useState([
-    'Item Name',
-    'Who Purchased',
-    'Specifications (Color/Size)',
-    'Quantity',
-    'Unit Price (GHS)',
-    'Total Cost (GHS)',
-    'Status'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Automatically fetch historical daily sales transactions from cache
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_sales_ledger_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default sample logs showing active transactions vs a sorted delivered row
-      setRows([
-        {
-          'Item Name': 'Stainless Steel Water Flask',
-          'Who Purchased': 'Ama Serwaa',
-          'Specifications (Color/Size)': 'Matte Black / 500ml',
-          'Quantity': '2',
-          'Unit Price (GHS)': '150.00',
-          'Total Cost (GHS)': '300.00',
-          'Status': 'Shipping Fee Pending'
-        },
-        {
-          'Item Name': 'Wireless Bluetooth Earbuds',
-          'Who Purchased': 'Kofi Mensah',
-          'Specifications (Color/Size)': 'White / One Size',
-          'Quantity': '1',
-          'Unit Price (GHS)': '104.00',
-          'Total Cost (GHS)': '104.00',
-          'Status': 'Delivered' // This will naturally sit lower down the table array
-        }
-      ]);
-    }
-  }, []);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'sales_ledger',
+    [
+      {
+        'Item Name': 'Stainless Steel Water Flask',
+        'Who Purchased': 'Ama Serwaa',
+        'Specifications (Color/Size)': 'Matte Black / 500ml',
+        'Quantity': '2',
+        'Unit Price (GHS)': '150.00',
+        'Total Cost (GHS)': '300.00',
+        'Status': 'Shipping Fee Pending'
+      },
+      {
+        'Item Name': 'Wireless Bluetooth Earbuds',
+        'Who Purchased': 'Kofi Mensah',
+        'Specifications (Color/Size)': 'White / One Size',
+        'Quantity': '1',
+        'Unit Price (GHS)': '104.00',
+        'Total Cost (GHS)': '104.00',
+        'Status': 'Delivered' // This will naturally sit lower down the table array
+      }
+    ],
+    [
+      'Item Name',
+      'Who Purchased',
+      'Specifications (Color/Size)',
+      'Quantity',
+      'Unit Price (GHS)',
+      'Total Cost (GHS)',
+      'Status'
+    ]
+  );
 
   // Intercept row updates to run dynamic quantity multiplication math
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
@@ -58,12 +50,11 @@ export default function SalesLedger() {
       return newRow;
     });
 
-    setRows(autoCalculatedRows);
-    localStorage.setItem('erp_sales_ledger_v2', JSON.stringify(autoCalculatedRows));
+    update(autoCalculatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -96,6 +87,8 @@ export default function SalesLedger() {
         </div>
 
         {/* Central Core Editable Table View */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

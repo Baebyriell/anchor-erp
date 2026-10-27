@@ -57,6 +57,22 @@ damage if something does get through (least privilege, backups, logging).
 
 ---
 
+## How Anchor ERP is secured
+
+- **Login required:** `proxy.ts` sends anyone not signed in to `/login`.
+  Sign-in uses Supabase Auth (`app/actions/auth.ts`).
+- **Data on the server:** all sheets are stored in the Supabase `sheets`
+  table. The browser never talks to Supabase directly; every read and write
+  goes through server actions in `app/actions/sheets.ts`, which check the
+  signed-in user, validate the data with zod, and rate-limit saves
+  (120 per minute per user).
+- **Row Level Security:** each user can only read and write their own rows
+  (`supabase/migrations/`).
+- **Old browser data** from the local-only version is uploaded to the server
+  the first time each page is opened, then removed from the browser.
+- **Environment variables:** `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`,
+  both server-only (see `.env.example`).
+
 ## Anchor ERP specific rules
 
 - **Business data lives on the server, behind login.** Customer names,

@@ -1,55 +1,46 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function CustomerCRM() {
-  const [headers, setHeaders] = useState([
-    'Full Name',
-    'Phone Number',
-    'WhatsApp Link',
-    'Email Address',
-    'Drop-off Location',
-    'Internal Side Notes'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Automatically load saved customers from your browser for free
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_customers_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default placeholder rows so your sheet isn't empty at start
-      setRows([
-        {
-          'Full Name': 'Ama Serwaa',
-          'Phone Number': '0551234567',
-          'WhatsApp Link': 'wa.me/233551234567',
-          'Email Address': 'ama@gmail.com',
-          'Drop-off Location': 'Accra Mall Pick-up',
-          'Internal Side Notes': 'Prefers air shipping only'
-        },
-        {
-          'Full Name': 'Kofi Mensah',
-          'Phone Number': '0249876543',
-          'WhatsApp Link': 'wa.me/233249876543',
-          'Email Address': 'kofi@yahoo.com',
-          'Drop-off Location': 'Kumasi VIP Station',
-          'Internal Side Notes': 'Always orders preorders'
-        }
-      ]);
-    }
-  }, []);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'customers',
+    [
+      {
+        'Full Name': 'Ama Serwaa',
+        'Phone Number': '0551234567',
+        'WhatsApp Link': 'wa.me/233551234567',
+        'Email Address': 'ama@gmail.com',
+        'Drop-off Location': 'Accra Mall Pick-up',
+        'Internal Side Notes': 'Prefers air shipping only'
+      },
+      {
+        'Full Name': 'Kofi Mensah',
+        'Phone Number': '0249876543',
+        'WhatsApp Link': 'wa.me/233249876543',
+        'Email Address': 'kofi@yahoo.com',
+        'Drop-off Location': 'Kumasi VIP Station',
+        'Internal Side Notes': 'Always orders preorders'
+      }
+    ],
+    [
+      'Full Name',
+      'Phone Number',
+      'WhatsApp Link',
+      'Email Address',
+      'Drop-off Location',
+      'Internal Side Notes'
+    ]
+  );
 
   // Save updates instantly whenever you type anything into a cell
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
-    setRows(updatedRows);
-    localStorage.setItem('erp_customers_v2', JSON.stringify(updatedRows));
+    update(updatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -63,7 +54,7 @@ export default function CustomerCRM() {
               👥 Page 6: Customer CRM Master File
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Organize your entire customer database network safely inside your browser.
+              Organize your entire customer database network securely on the server.
             </p>
           </div>
           <span className="text-[11px] bg-blue-500/10 text-blue-400 font-bold px-3 py-1 rounded-md border border-blue-500/20">
@@ -77,6 +68,8 @@ export default function CustomerCRM() {
         </div>
 
         {/* The Live Connected Editable Spreadsheet */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

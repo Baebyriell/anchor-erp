@@ -1,63 +1,48 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import { loadSheets } from './actions/sheets';
+import { signOut } from './actions/auth';
 
-export default function MasterDashboard() {
-  // Available Metrics Cache
-  const [readySalesCount, setReadySalesCount] = useState(0);
-  const [readyRevenue, setReadyRevenue] = useState(0);
-  
-  // Pre-Order Metrics Cache
-  const [preorderCount, setPreorderCount] = useState(0);
-  const [preorderRevenue, setPreorderRevenue] = useState(0);
+// Rendered on the server for the signed-in user; no business data is kept in the browser.
+export const dynamic = 'force-dynamic';
 
-  // CRM Metrics Cache
-  const [customerCount, setCustomerCount] = useState(0);
+export default async function MasterDashboard() {
+  const sheets = await loadSheets(['sales_ledger', 'preorder_by_item', 'customers']);
 
-  useEffect(() => {
-    // 1. Pull Available Goods ledger metrics
-    const rawSales = localStorage.getItem('erp_sales_ledger_v2');
-    if (rawSales) {
-      const sales = JSON.parse(rawSales);
-      setReadySalesCount(sales.length);
-      const total = sales.reduce((sum: number, item: any) => sum + (parseFloat(item['Total Cost (GHS)']) || 0), 0);
-      setReadyRevenue(total);
-    } else {
-      setReadySalesCount(2);
-      setReadyRevenue(404.00); // Default template fallback base
-    }
+  // 1. Available Goods ledger metrics
+  const sales = sheets.sales_ledger?.rows;
+  const readySalesCount = sales ? sales.length : 2;
+  const readyRevenue = sales
+    ? sales.reduce((sum: number, item: any) => sum + (parseFloat(item['Total Cost (GHS)']) || 0), 0)
+    : 404.00; // Default template fallback base
 
-    // 2. Pull Pre-Order logs ledger metrics
-    const rawPreorders = localStorage.getItem('erp_preorder_by_item_v2');
-    if (rawPreorders) {
-      const preorders = JSON.parse(rawPreorders);
-      setPreorderCount(preorders.length);
-      const total = preorders.reduce((sum: number, item: any) => sum + (parseFloat(item['Calculated Total Cost (GHS)']) || 0), 0);
-      setPreorderRevenue(total);
-    } else {
-      setPreorderCount(2);
-      setPreorderRevenue(752.50);
-    }
+  // 2. Pre-Order logs ledger metrics
+  const preorders = sheets.preorder_by_item?.rows;
+  const preorderCount = preorders ? preorders.length : 2;
+  const preorderRevenue = preorders
+    ? preorders.reduce((sum: number, item: any) => sum + (parseFloat(item['Calculated Total Cost (GHS)']) || 0), 0)
+    : 752.50;
 
-    // 3. Pull Customer CRM counts
-    const rawCustomers = localStorage.getItem('erp_customers_v2');
-    if (rawCustomers) {
-      setCustomerCount(JSON.parse(rawCustomers).length);
-    } else {
-      setCustomerCount(2);
-    }
-  }, []);
+  // 3. Customer CRM counts
+  const customerCount = sheets.customers ? sheets.customers.rows.length : 2;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-mono">
       <div className="max-w-5xl mx-auto space-y-8">
         
         {/* Hub Header */}
-        <header className="border-b border-slate-800 pb-6">
-          <h1 className="text-3xl font-black text-amber-400 tracking-tight">⚓ ANCHOR CORE ERP v1.0</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            China-to-Ghana Pre-Order Pipeline Engine & Local Ready Stock Management Suite
-          </p>
+        <header className="border-b border-slate-800 pb-6 flex justify-between items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-amber-400 tracking-tight">⚓ ANCHOR CORE ERP v1.0</h1>
+            <p className="text-xs text-slate-500 mt-1">
+              China-to-Ghana Pre-Order Pipeline Engine & Local Ready Stock Management Suite
+            </p>
+          </div>
+          <form action={signOut}>
+            <button type="submit" className="text-xs text-slate-400 hover:text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 transition whitespace-nowrap">
+              Sign out
+            </button>
+          </form>
         </header>
 
         {/* Modular Navigation Shortcuts Grid Panel */}
@@ -140,7 +125,7 @@ export default function MasterDashboard() {
         {/* Global Overview Section */}
         <section className="bg-slate-900/30 border border-slate-800/80 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs text-slate-400 gap-4">
           <div>
-            🔒 <span className="text-slate-200 font-bold">Local-First Storage Matrix Mode:</span> Your ledger logs are fully compiled locally within this terminal session cache for enhanced user data privacy.
+            🔒 <span className="text-slate-200 font-bold">Secure Server Storage:</span> Your ledgers are saved to a private server database, visible only to your signed-in account.
           </div>
           <div className="text-slate-500 whitespace-nowrap text-right">
             System Status: <span className="text-emerald-400 font-bold">● Active Operational</span>

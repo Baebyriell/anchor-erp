@@ -1,58 +1,49 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function PreOrderCatalog() {
-  const [headers, setHeaders] = useState([
-    'Item Name',
-    'Platform Source',
-    'Item Link',
-    'Item Specifications',
-    'Available Sizes',
-    'Estimated Weight (kg)',
-    'Item Information'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Load saved catalog items from browser cache automatically
-  useEffect(() => {
-    const saved = localStorage.getItem('erp_items_preorder_v2');
-    if (saved) {
-      setRows(JSON.parse(saved));
-    } else {
-      // Default sample items to map out your layout instantly
-      setRows([
-        {
-          'Item Name': 'Luxury Mesh Sneakers',
-          'Platform Source': '1688.com',
-          'Item Link': 'https://1688.com',
-          'Item Specifications': 'Breathable, sport sole',
-          'Available Sizes': '39, 40, 41, 42, 43',
-          'Estimated Weight (kg)': '0.85',
-          'Item Information': 'High demand for coming season'
-        },
-        {
-          'Item Name': 'Foldable LED Ring Light',
-          'Platform Source': 'Taobao',
-          'Item Link': 'https://taobao.com',
-          'Item Specifications': '3 light modes, USB plug',
-          'Available Sizes': '10 inch, 12 inch',
-          'Estimated Weight (kg)': '1.40',
-          'Item Information': 'Verify bundle parameters with supplier'
-        }
-      ]);
-    }
-  }, []);
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'items_preorder',
+    [
+      {
+        'Item Name': 'Luxury Mesh Sneakers',
+        'Platform Source': '1688.com',
+        'Item Link': 'https://1688.com',
+        'Item Specifications': 'Breathable, sport sole',
+        'Available Sizes': '39, 40, 41, 42, 43',
+        'Estimated Weight (kg)': '0.85',
+        'Item Information': 'High demand for coming season'
+      },
+      {
+        'Item Name': 'Foldable LED Ring Light',
+        'Platform Source': 'Taobao',
+        'Item Link': 'https://taobao.com',
+        'Item Specifications': '3 light modes, USB plug',
+        'Available Sizes': '10 inch, 12 inch',
+        'Estimated Weight (kg)': '1.40',
+        'Item Information': 'Verify bundle parameters with supplier'
+      }
+    ],
+    [
+      'Item Name',
+      'Platform Source',
+      'Item Link',
+      'Item Specifications',
+      'Available Sizes',
+      'Estimated Weight (kg)',
+      'Item Information'
+    ]
+  );
 
   // Save changes instantly when you update any data cell
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
-    setRows(updatedRows);
-    localStorage.setItem('erp_items_preorder_v2', JSON.stringify(updatedRows));
+    update(updatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -80,6 +71,8 @@ export default function PreOrderCatalog() {
         </div>
 
         {/* Dynamic Spreadsheet Engine View */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}

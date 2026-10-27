@@ -1,48 +1,36 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import EditableTable from '../../components/EditableTable';
+import { useSheet, SaveIndicator } from '../../hooks/useSheet';
 
 export default function CustomerSummaryMatrix() {
-  const [headers, setHeaders] = useState([
-    'Customer Name',
-    'All Items Purchased',
-    'Individual Prices Breakdown',
-    'Total Accumulated Bill (GHS)',
-    'Global Account Status'
-  ]);
-
-  const [rows, setRows] = useState<Record<string, any>[]>([]);
-
-  // Aggregate and load relational data from browser memory caches
-  useEffect(() => {
-    const savedMatrix = localStorage.getItem('erp_customer_matrix_v2');
-    
-    if (savedMatrix) {
-      setRows(JSON.parse(savedMatrix));
-    } else {
-      // Fetch data streams from Sales Ledger and Pre-Order logs if available
-      const rawSales = localStorage.getItem('erp_sales_ledger_v2');
-      const salesData = rawSales ? JSON.parse(rawSales) : [];
-
-      // Simulated compilation of grouped customer data logs
-      setRows([
-        {
-          'Customer Name': 'Ama Serwaa',
-          'All Items Purchased': 'Stainless Steel Water Flask, Luxury Mesh Sneakers',
-          'Individual Prices Breakdown': '150.00, 212.50',
-          'Total Accumulated Bill (GHS)': '362.50',
-          'Global Account Status': 'Awaiting Arrival'
-        },
-        {
-          'Customer Name': 'Kofi Mensah',
-          'All Items Purchased': 'Wireless Bluetooth Earbuds',
-          'Individual Prices Breakdown': '104.00',
-          'Total Accumulated Bill (GHS)': '104.00',
-          'Global Account Status': 'Delivered' // Sorted to bottom automatically
-        }
-      ]);
-    }
-  }, []);
+  // Simulated compilation of grouped customer data logs
+  const { rows, headers, update, updateHeaders, status } = useSheet<Record<string, any>>(
+    'customer_matrix',
+    [
+      {
+        'Customer Name': 'Ama Serwaa',
+        'All Items Purchased': 'Stainless Steel Water Flask, Luxury Mesh Sneakers',
+        'Individual Prices Breakdown': '150.00, 212.50',
+        'Total Accumulated Bill (GHS)': '362.50',
+        'Global Account Status': 'Awaiting Arrival'
+      },
+      {
+        'Customer Name': 'Kofi Mensah',
+        'All Items Purchased': 'Wireless Bluetooth Earbuds',
+        'Individual Prices Breakdown': '104.00',
+        'Total Accumulated Bill (GHS)': '104.00',
+        'Global Account Status': 'Delivered' // Sorted to bottom automatically
+      }
+    ],
+    [
+      'Customer Name',
+      'All Items Purchased',
+      'Individual Prices Breakdown',
+      'Total Accumulated Bill (GHS)',
+      'Global Account Status'
+    ]
+  );
 
   // Recalculate automatic variables if user adjustments happen inside columns
   const handleRowsUpdate = (updatedRows: Record<string, any>[]) => {
@@ -61,12 +49,11 @@ export default function CustomerSummaryMatrix() {
       return newRow;
     });
 
-    setRows(recalculatedRows);
-    localStorage.setItem('erp_customer_matrix_v2', JSON.stringify(recalculatedRows));
+    update(recalculatedRows);
   };
 
   const handleHeadersUpdate = (updatedHeaders: string[]) => {
-    setHeaders(updatedHeaders);
+    updateHeaders(updatedHeaders);
   };
 
   return (
@@ -94,6 +81,8 @@ export default function CustomerSummaryMatrix() {
         </div>
 
         {/* Live Sorting Table Engine Container */}
+        <div className="flex justify-end"><SaveIndicator status={status} /></div>
+
         <EditableTable
           headers={headers}
           rows={rows}
