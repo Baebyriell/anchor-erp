@@ -72,6 +72,14 @@ damage if something does get through (least privilege, backups, logging).
   the first time each page is opened, then removed from the browser.
 - **Environment variables:** `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`,
   both server-only (see `.env.example`).
+- **Session cookies** are `HttpOnly`, `Secure` (in production) and
+  `SameSite=Lax` (`lib/supabase/cookies.ts`), so scripts in the page can't
+  steal a login.
+- **Proof that RLS works:** run `supabase/tests/rls_check.sql` in the
+  Supabase SQL Editor — every check must say PASS.
+
+The full, project-independent checklist is in
+[`docs/SECURITY-PLAYBOOK.md`](docs/SECURITY-PLAYBOOK.md).
 
 ## Anchor ERP specific rules
 

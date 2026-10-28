@@ -1,12 +1,14 @@
 import 'server-only';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { sessionCookieOptions } from './cookies';
 
 // Server-only Supabase client. The browser never talks to Supabase directly:
 // every read and write goes through server actions using the user's session cookie.
 export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    cookieOptions: sessionCookieOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();

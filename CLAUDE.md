@@ -4,7 +4,8 @@ Next.js (App Router) ERP for a China-to-Ghana pre-order and ready-stock business
 
 ## Security rules (always follow)
 
-Read and follow `SECURITY.md` for every change. In short:
+Read and follow `SECURITY.md` (this app) and `docs/SECURITY-PLAYBOOK.md`
+(the full checklist for every project) for every change. In short:
 
 - Secrets and API keys only on the server, in environment variables. Never in
   `'use client'` files or `NEXT_PUBLIC_*` variables. Never commit `.env` files.
@@ -17,4 +18,6 @@ Read and follow `SECURITY.md` for every change. In short:
 - Add rate limiting to API routes.
 - If using Supabase: RLS on every table; the `service_role` key is server-only.
 - This repo is public: never commit real customer data.
-- Run `npm audit` and `npm run build` before pushing.
+- Session cookies stay `HttpOnly`/`Secure` (`lib/supabase/cookies.ts`).
+- After any database change, run `supabase/tests/rls_check.sql`; every line must say PASS.
+- Run `npm run security` and `npm run build` before pushing.
