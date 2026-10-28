@@ -24,7 +24,9 @@ create policy "Users update their own sheets" on public.sheets
 create policy "Users delete their own sheets" on public.sheets
   for delete to authenticated using ((select auth.uid()) = owner_id);
 
-revoke all on public.sheets from anon;
+-- Explicit grants, so this works when "Automatically expose new tables" is off.
+revoke all on public.sheets from anon, authenticated;
+grant select, insert, update, delete on public.sheets to authenticated;
 
 -- Per-user request counter used to rate-limit server actions.
 create table public.rate_limits (
